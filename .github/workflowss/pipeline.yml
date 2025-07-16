@@ -1,62 +1,42 @@
-name: CI Pipeline
+name: Hello GitHub Actions
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build:
+  hello_job:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Say Hello
+        run: echo "Hello, GitHub Actions!"
+
+  job2:
+    runs-on: ubuntu-latest
+    needs: hello_job
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Run a simple command
+        run: echo "This is job2 running after hello_job"
+      
+      - name: List files
+        run: ls -la
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build project
-        run: npm run build
-
-  test:
+  job3:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [hello_job, job2]
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm test
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Deploy
-        run: echo "Deploying to production..." # Replace with your actual deploy command
+      
+      - name: Display information
+        run: |
+          echo "This is job3 running after both hello_job and job2"
+          echo "Current date: $(date)"
+          echo "GitHub Runner OS: $(uname -a)"
